@@ -614,9 +614,9 @@ void ClickGUI::onRender(RenderEvent &event) {
                     c->extraPadding();
 
                     c->addHeader("Fonts");
-                    c->addTextBox("ClickGUI", "", Client::settings.getSettingByName<std::string>("fontname")->value);
+                    c->addTextBox("ClickGUI", "", Client::settings.getSettingByName<std::string>("fontname")->value, 48);
                     c->addSlider("Universal Font Scale", "", Client::settings.getSettingByName<float>("gui_font_scale")->value, 2.f, 0.f, true);
-                    c->addTextBox("Modules", "", Client::settings.getSettingByName<std::string>("mod_fontname")->value);
+                    c->addTextBox("Modules", "", Client::settings.getSettingByName<std::string>("mod_fontname")->value, 48);
                     c->addSlider("Universal Font Scale", "", Client::settings.getSettingByName<float>("modules_font_scale")->value, 2.f, 0.f, true);
                     c->addToggle("Override Font Weight", "", Client::settings.getSettingByName<bool>("overrideFontWeight")->value);
                     c->addDropdown("Font Weight", "Bold, Thin, etc.", {"Bold", "Normal", "SemiBold", "ExtraBold", "Medium", "Light", "ExtraLight"}, Client::settings.getSettingByName<std::string>("fontWeight")->value);
@@ -643,9 +643,6 @@ void ClickGUI::onRender(RenderEvent &event) {
                         c->addToggle("Force Intel DX11", "May help with Better RenderDragon", Client::settings.getSettingByName<bool>("forceIntel")->value);
                     }
                     c->addToggle("Recreate Swapchain At Start", "May help with Better RenderDragon", Client::settings.getSettingByName<bool>("recreateAtStart")->value);
-                    c->addDropdown("Buffering Mode", "May improve latency or performance.", {"Double Buffering", "Triple Buffering"}, Client::settings.getSettingByName<std::string>("bufferingmode")->value);
-                    c->addDropdown("Swap Effect", "May improve latency or performance.", {"FLIP_SEQUENTIAL", "FLIP_DISCARD"}, Client::settings.getSettingByName<std::string>("swapeffect")->value);
-
                     c->extraPadding();
 
                     c->addElementText("Following Does Not Require Restart");

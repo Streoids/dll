@@ -13,6 +13,7 @@
 #include "../../../../../lib/ImGui/imgui.h"
 #include "../../../Client.hpp"
 #include "../../../Module/Modules/GuiScale/GuiScale.hpp"
+#include "Modules/MotionBlur/MotionBlur.hpp"
 
 void ResizeHook::enableHook() {
 
@@ -40,23 +41,13 @@ ResizeHook::resizeCallback(IDXGISwapChain* pSwapChain, UINT bufferCount, UINT wi
     ResizeHook::cleanShit(true);
 
     SwapchainHook::init = false;
-    // F11 on loading screen fix?
+    // F11 on loading screen fix?//
     auto module = ModuleManager::getModule("ClickGUI");
     if (module != nullptr)
         if (ModuleManager::getModule("ClickGUI")->active)
             if (SDK::hasInstanced)
                 if (SDK::clientInstance != nullptr)
                     SDK::clientInstance->releaseMouse();
-
-    std::string bufferingMode = Client::settings.getSettingByName<std::string>("bufferingmode")->value;
-
-
-    if (bufferingMode == "Double Buffering" && !SwapchainHook::queue) {
-        bufferCount = 2;
-    }
-    else if (bufferingMode == "Triple Buffering") {
-        bufferCount = 3;
-    }
 
     GuiScale::fixResize = true;
 
@@ -81,6 +72,19 @@ void ResizeHook::cleanShit(bool isResize) {
     Memory::SafeRelease(SwapchainHook::d3d11Device);
     Memory::SafeRelease(SwapchainHook::D2D1Bitmap);
     Memory::SafeRelease(D2D::context);
+
+    Memory::SafeRelease(AvgPixelMotionBlurHelper::m_constantBuffer);
+    Memory::SafeRelease(AvgPixelMotionBlurHelper::m_inputLayout);
+    Memory::SafeRelease(AvgPixelMotionBlurHelper::m_pixelShader);
+    Memory::SafeRelease(AvgPixelMotionBlurHelper::m_vertexShader);
+    Memory::SafeRelease(AvgPixelMotionBlurHelper::m_vertexBuffer);
+
+    Memory::SafeRelease(RealMotionBlurHelper::m_constantBuffer);
+    Memory::SafeRelease(RealMotionBlurHelper::m_inputLayout);
+    Memory::SafeRelease(RealMotionBlurHelper::m_pixelShader);
+    Memory::SafeRelease(RealMotionBlurHelper::m_vertexShader);
+    Memory::SafeRelease(RealMotionBlurHelper::m_vertexBuffer);
+    MotionBlur::initted = false;
 
 
     Blur::hasDoneFrames = false;
@@ -207,9 +211,12 @@ void ResizeHook::cleanShit(bool isResize) {
         Memory::SafeRelease(SwapchainHook::D3D12DescriptorHeap);         Memory::SafeRelease(SwapchainHook::d3d12DescriptorHeapBackBuffers);
         Memory::SafeRelease(SwapchainHook::d3d12DescriptorHeapImGuiRender); Memory::SafeRelease(SwapchainHook::d3d12DescriptorHeapImGuiIMAGE);
 
+
         if (ImGui::GetCurrentContext()) {
-            ImGui::GetIO().Fonts->Clear();
-            FlarialGUI::FontMap.clear();
+            if (!isResize) {
+                ImGui::GetIO().Fonts->Clear();
+                FlarialGUI::FontMap.clear();
+            }
 
             ImGui_ImplWin32_Shutdown();
 
@@ -217,8 +224,6 @@ void ResizeHook::cleanShit(bool isResize) {
                 ImGui_ImplDX11_Shutdown();
             else { ImGui_ImplDX12_Shutdown(); }
 
-            FlarialGUI::DoLoadModuleFontLater = true;
-            FlarialGUI::DoLoadGUIFontLater = true;
             ImGui::DestroyContext();
 
         }
